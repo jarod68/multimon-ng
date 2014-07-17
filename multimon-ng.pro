@@ -74,6 +74,25 @@ LIBS += -lwinmm
 #DEFINES += ARCH_I386
 }
 
+unix:linux-arm-gnueabi-g++:!symbian:!macx{
+DEFINES += ARCH_ARM
+DEFINES += PULSE_AUDIO
+DEFINES += CHARSET_UTF8
+DEFINES += NO_X11
+LIBS += -lm -lpulse-simple -lpulse
+SOURCES += demod_display.c 
+}
+
+unix:linux-gnueabi-oe-g++:!symbian:!macx{
+DEFINES += ARCH_ARM
+DEFINES += PULSE_AUDIO
+DEFINES += CHARSET_UTF8
+DEFINES += NO_X11
+LIBS += -lm -lpulse-simple -lpulse
+SOURCES += demod_display.c 
+}
+
+
 unix:freebsd-g++:!symbian:!macx{
 #DEFINES += ARCH_I386
 DEFINES += PULSE_AUDIO
