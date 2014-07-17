@@ -228,10 +228,10 @@ static void input_sound(unsigned int sample_rate, unsigned int overlap,
     int i;
     int error;
     short *sp;
+    char *source = ifname ? ifname : NULL;
 
-    (void) ifname;  // Suppress the warning.
 
-    
+    printf("Using source %s\n", source);
     // Init stuff from pa.org
     pa_simple *s;
     pa_sample_spec ss;
@@ -242,7 +242,7 @@ static void input_sound(unsigned int sample_rate, unsigned int overlap,
     
     
     /* Create the recording stream */
-    if (!(s = pa_simple_new(NULL, "multimon-ng", PA_STREAM_RECORD, NULL, "record", &ss, NULL, NULL, &error))) {
+    if (!(s = pa_simple_new(NULL, "multimon-ng", PA_STREAM_RECORD, source, "record", &ss, NULL, NULL, &error))) {
         fprintf(stderr, __FILE__": pa_simple_new() failed: %s\n", pa_strerror(error));
         exit(4);
     }
