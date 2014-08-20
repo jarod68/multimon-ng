@@ -40,7 +40,7 @@
  * 
  */
 
-#define SAMPLE_RATE 22050
+#define SAMPLE_RATE 8000
 #define BLOCKLEN (SAMPLE_RATE/100)  /* 10ms blocks */
 #define BLOCKNUM 4    /* must match numbers in multimon.h */
 
