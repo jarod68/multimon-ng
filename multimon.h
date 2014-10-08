@@ -111,6 +111,7 @@ struct demod_state {
             unsigned char rx_word;
             int32_t function;          // POCSAG function
             int32_t address;           // POCSAG address
+            char timestamp[128];            // timestamp
             unsigned char buffer[512];
             uint32_t numnibbles;
             uint32_t pocsag_total_error_count;

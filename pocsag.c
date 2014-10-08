@@ -33,6 +33,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include <sys/time.h>
+#include <time.h>
 
 /* ---------------------------------------------------------------------- */
 
@@ -387,7 +389,7 @@ static void pocsag_printmessage(struct demod_state *s, bool sync)
     {
         if(s->l2.pocsag.numnibbles == 0)
         {
-            verbprintf(0, "%s: Address: %7lu  Function: %1hhi ",s->dem_par->name,
+            verbprintf(0, "%s - %s: Address: %7lu  Function: %1hhi ",s->l2.pocsag.timestamp, s->dem_par->name,
                        s->l2.pocsag.address, s->l2.pocsag.function);
             if(!sync) verbprintf(2,"<LOST SYNC>");
             verbprintf(0,"\n");
@@ -417,10 +419,10 @@ static void pocsag_printmessage(struct demod_state *s, bool sync)
             if((pocsag_mode == POCSAG_MODE_NUMERIC) || ((pocsag_mode == POCSAG_MODE_AUTO) && (guess_num >= 20 || unsure)))
             {
                 if((s->l2.pocsag.address != -2) || (s->l2.pocsag.function != -2))
-                    verbprintf(0, "%s: Address: %7lu  Function: %1hhi  ",s->dem_par->name,
+                    verbprintf(0, "%s - %s: Address: %7lu  Function: %1hhi  ",s->l2.pocsag.timestamp, s->dem_par->name,
                            s->l2.pocsag.address, s->l2.pocsag.function);
                 else
-                    verbprintf(0, "%s: Address:       -  Function: -  ",s->dem_par->name);
+                    verbprintf(0, "%s - %s: Address:       -  Function: -  ",s->l2.pocsag.timestamp, s->dem_par->name);
                 if(pocsag_mode == POCSAG_MODE_AUTO)
                     verbprintf(3, "Certainty: %5i  ", guess_num);
                 verbprintf(0, "Numeric: %s", num_string);
@@ -431,10 +433,10 @@ static void pocsag_printmessage(struct demod_state *s, bool sync)
             if((pocsag_mode == POCSAG_MODE_ALPHA) || ((pocsag_mode == POCSAG_MODE_AUTO) && (guess_alpha >= 20 || unsure)))
             {
                 if((s->l2.pocsag.address != -2) || (s->l2.pocsag.function != -2))
-                    verbprintf(0, "%s: Address: %7lu  Function: %1hhi  ",s->dem_par->name,
+                    verbprintf(0, "%s - %s: Address: %7lu  Function: %1hhi  ",s->l2.pocsag.timestamp, s->dem_par->name,
                            s->l2.pocsag.address, s->l2.pocsag.function);
                 else
-                    verbprintf(0, "%s: Address:       -  Function: -  ",s->dem_par->name);
+                    verbprintf(0, "%s - %s: Address:       -  Function: -  ",s->l2.pocsag.timestamp, s->dem_par->name);
                 if(pocsag_mode == POCSAG_MODE_AUTO)
                     verbprintf(3, "Certainty: %5i  ", guess_alpha);
                 verbprintf(0, "Alpha:   %s", alpha_string);
@@ -445,13 +447,13 @@ static void pocsag_printmessage(struct demod_state *s, bool sync)
             if((pocsag_mode == POCSAG_MODE_SKYPER) || ((pocsag_mode == POCSAG_MODE_AUTO) && (guess_skyper >= 20 || unsure)))
             {
                 if((s->l2.pocsag.address != -2) || (s->l2.pocsag.function != -2))
-                    verbprintf(0, "%s: Address: %7lu  Function: %1hhi  ",s->dem_par->name,
+                    verbprintf(0, "%s - %s: Address: %7lu  Function: %1hhi  ",s->l2.pocsag.timestamp, s->dem_par->name,
                            s->l2.pocsag.address, s->l2.pocsag.function);
                 else
-                    verbprintf(0, "%s: Address:       -  Function: -  ",s->dem_par->name);
+                    verbprintf(0, "%s - %s: Address:       -  Function: -  ",s->l2.pocsag.timestamp, s->dem_par->name);
                 if(pocsag_mode == POCSAG_MODE_AUTO)
                     verbprintf(3, "Certainty: %5i  ", guess_skyper);
-                verbprintf(0, "Skyper:  %s", skyper_string);
+                verbprintf(0, "%s Skyper:  %s",s->l2.pocsag.timestamp, skyper_string);
                 if(!sync) verbprintf(2,"<LOST SYNC>");
                 verbprintf(0,"\n");
             }
@@ -466,6 +468,7 @@ void pocsag_init(struct demod_state *s)
     memset(&s->l2.pocsag, 0, sizeof(s->l2.pocsag));
     s->l2.pocsag.address = -1;
     s->l2.pocsag.function = -1;
+    strcpy(s->l2.pocsag.timestamp, "");
 }
 
 void pocsag_deinit(struct demod_state *s)
@@ -830,6 +833,15 @@ static void do_one_bit(struct demod_state *s, uint32_t rx_data)
                 verbprintf(4, "Got an address: %u\n", rx_data);
                 s->l2.pocsag.function = (rx_data >> 11) & 3;
                 s->l2.pocsag.address  = ((rx_data >> 10) & 0x1ffff8) | ((rxword >> 1) & 7);
+
+                time_t zaman;
+                struct tm *ltime;
+
+                time(&zaman);
+                ltime = (struct tm *) localtime(&zaman);
+                
+                strftime(s->l2.pocsag.timestamp,40,"%d.%m.%y %H:%M:%S",ltime); /// TODO HERE
+
                 s->l2.pocsag.state = MESSAGE;
                 return;
             }
